@@ -1,0 +1,5 @@
+wave_no,wave_name,targeted,not_ready,user_deferred,network_outage,download_failed,rejected_signature,rejected_integrity,attempted,installed,rolled_back,safe_state,failed,complaints,success_rate,rollback_rate,rollback_wilson_low,complaint_rate,complaint_wilson_low,decision,decision_reasons
+1,pilot,271,71,33,0,3,0,0,164,162,2,0,2,1,0.9878,0.0122,0.0034,0.0061,0.0011,PASS,
+2,expand-1,186,45,19,0,0,0,0,122,120,2,0,2,0,0.9836,0.0164,0.0045,0.0,0.0,PASS,
+3,expand-2,1370,331,146,330,9,0,3,551,545,6,0,6,0,0.9891,0.0109,0.005,0.0,0.0,PASS,
+4,full,2740,670,331,0,24,0,12,1703,1683,20,0,20,10,0.9883,0.0117,0.0076,0.0059,0.0032,PASS,

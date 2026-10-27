@@ -1,0 +1,122 @@
+{
+  "campaign_id": "MY-2026-11-SW160-FAULTY-DEMO",
+  "as_of": "2026-10-27",
+  "seed": 7,
+  "data_note": "车队为合成数据（SYNTHETIC_DEMO），结果只用于演示规划逻辑",
+  "purpose_and_changes": {
+    "purpose": "修复若干软件问题（演示文本）。重要程度：常规，不是召回，也不是安全或安保紧急升级。",
+    "changes": "本次假设改动了型式批准相关软件，所以 RXSWIN 从 06 变为 07（演示文本）",
+    "expected_duration_min": 25,
+    "unavailable_functions": "安装期间车辆不能启动和行驶，中控和远程控制不可用",
+    "instructions": "请在安全地点驻车，挂 P 挡并熄火后开始；安装期间不要尝试启动车辆"
+  },
+  "from_versions": [
+    "1.4.2",
+    "1.5.0"
+  ],
+  "to_version": "1.6.0",
+  "type_approval_relevant": true,
+  "rxswin_after": {
+    "MODEL_A": "A-RX-07",
+    "MODEL_B": "B-RX-07",
+    "MODEL_C": "C-RX-07"
+  },
+  "markets": {
+    "MY": {
+      "approval_ready": true,
+      "note": "假设该市场所需的批准或扩展已经完成。马来西亚是否适用 UN R156 本项目未核实。"
+    }
+  },
+  "release_gate": {
+    "package_sha256": "PLACEHOLDER-由发布流水线填写",
+    "signature_verified": true,
+    "vv_passed": true,
+    "requires_skilled_action": false,
+    "install_while_driving": false
+  },
+  "eligible_vehicles": 4567,
+  "ineligible_reason_counts": {
+    "HW_INCOMPATIBLE": 137,
+    "VERSION_NOT_IN_PATH": 229,
+    "STALE_CONFIG": 252,
+    "CRITICAL_DTC": 61,
+    "RXSWIN_MISMATCH": 23,
+    "ALREADY_ON_TARGET": 55
+  },
+  "wave_sizing": {
+    "min_attempts": 149,
+    "pilot_by_power": 271,
+    "eligible": 4567,
+    "cumulative_targets": [
+      271,
+      457,
+      1827,
+      4567
+    ],
+    "strata": 25,
+    "pilot_strata_covered": 25
+  },
+  "waves": [
+    {
+      "targeted": 271,
+      "not_ready": 71,
+      "user_deferred": 31,
+      "network_outage": 0,
+      "download_failed": 2,
+      "rejected_signature": 0,
+      "rejected_integrity": 0,
+      "attempted": 167,
+      "installed": 154,
+      "rolled_back": 13,
+      "safe_state": 0,
+      "failed": 13,
+      "complaints": 4,
+      "wave_no": 1,
+      "wave_name": "pilot",
+      "decision": "HALT",
+      "decision_reasons": "rollback_rate=13/167=7.78%, Wilson下界4.61%>2.00% | complaint_rate=4/167=2.40%>1.00%（下界0.94%未超）",
+      "success_rate": 0.9222,
+      "rollback_rate": 0.0778,
+      "rollback_wilson_low": 0.0461,
+      "complaint_rate": 0.024,
+      "complaint_wilson_low": 0.0094
+    },
+    {
+      "wave_no": 2,
+      "wave_name": "expand-1",
+      "targeted": 186,
+      "decision": "NOT_EXECUTED"
+    },
+    {
+      "wave_no": 3,
+      "wave_name": "expand-2",
+      "targeted": 1370,
+      "decision": "NOT_EXECUTED"
+    },
+    {
+      "wave_no": 4,
+      "wave_name": "full",
+      "targeted": 2740,
+      "decision": "NOT_EXECUTED"
+    }
+  ],
+  "final_status": "HALT_AFTER_pilot",
+  "final_state_counts": {
+    "NEW_VERSION_VERIFIED": 154,
+    "OLD_VERSION_INTACT": 4400,
+    "OLD_VERSION_RESTORED": 13
+  },
+  "final_state_violations": [],
+  "fault_summary": [
+    {
+      "fault": "FLASH_FAILURE",
+      "detail": "ROLLED_BACK",
+      "events": 13,
+      "NEW_VERSION_VERIFIED": 0,
+      "OLD_VERSION_INTACT": 0,
+      "OLD_VERSION_RESTORED": 13,
+      "SAFE_STATE_NEEDS_SERVICE": 0,
+      "all_safe_and_recorded": "Y"
+    }
+  ]
+}

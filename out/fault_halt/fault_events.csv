@@ -1,0 +1,4 @@
+vehicle_id,wave_no,wave_name,fault,detail,detected_by,response,basis,outcome,final_state,sw_version_after,rxswin_after
+SYN-000982,1,pilot,FLASH_FAILURE,ROLLED_BACK,ECU 刷写结果,自动回滚到旧版本,R156 7.2.2.1.1；GB 44496 5.2.9；C10,ROLLED_BACK,OLD_VERSION_RESTORED,1.4.2,C-RX-06
+SYN-004870,2,expand-1,SIGNATURE_INVALID,REFUSED,车端校验：升级清单签名,拒装，上报安全事件；活动零容忍，出现即叫停,R156 7.2.1.1、7.1.3.1；R155 M16；C12,REJECTED_SIGNATURE,OLD_VERSION_INTACT,1.4.2,B-RX-06
+SYN-003936,2,expand-1,SIGNATURE_INVALID,REFUSED,车端校验：升级清单签名,拒装，上报安全事件；活动零容忍，出现即叫停,R156 7.2.1.1、7.1.3.1；R155 M16；C12,REJECTED_SIGNATURE,OLD_VERSION_INTACT,1.5.0,C-RX-06

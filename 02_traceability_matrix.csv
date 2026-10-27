@@ -1,0 +1,28 @@
+﻿control_id,control_cn,stage,r156,gb44496,r155_gb44495,tool_implementation,evidence_output,note
+C01,目标车辆识别：按车型、市场、版本路径圈定目标,资格（服务端）,7.1.1.6（01: 7.1.1.7）；7.1.2.4,草案 4.2.4、4.3.4,,check_eligibility：MODEL_NOT_TARGETED、MARKET_NOT_TARGETED、VERSION_NOT_IN_PATH、ALREADY_ON_TARGET,eligibility.csv；campaign_record.json,
+C02,兼容性确认：硬件白名单、升级路径、最后已知配置的新鲜度,资格（服务端）,7.1.1.5、7.1.1.7（01: 7.1.1.6、7.1.1.8）；7.1.2.4,草案 4.2.3、4.2.5,,HW_INCOMPATIBLE、VERSION_NOT_IN_PATH、STALE_CONFIG（超过 30 天）,eligibility.csv,30 天是设计选择；法规只要求评估“最后已知配置”
+C03,RXSWIN 一致性核验,资格（服务端）,7.1.1.4（01: 7.1.1.5）；7.1.2.3,草案 4.2.2 c),,RXSWIN_MISMATCH（对照配置里的 rxswin_register）,eligibility.csv,不一致的车转人工排查，不推送
+C04,型式批准影响评估与市场放行,发布前 + 资格,7.1.1.8–7.1.1.10（01: 7.1.1.9–7.1.1.11）；7.1.2.5 (c)-(f)；9.1.3；01 系列 7.1.4,草案 4.2.6–4.2.8,,type_approval_relevant + markets.*.approval_ready → MARKET_APPROVAL_PENDING；发布闸门要求给出 rxswin_after,eligibility.csv；campaign_record.json,各市场的批准状态由认证团队提供，工具只做门控
+C05,升级前告知内容齐全,发布前,7.2.2.2 (a)-(e)；7.1.1.11（01: 7.1.1.12）,5.2.1、5.2.10,,check_release_gate 检查 notification 的五个字段,campaign_record.json（purpose_and_changes）,
+C06,用户确认后才安装,车端,无对应（按 GB 统一设计）,5.2.2,,simulate_vehicle：p_consent，未确认 → USER_DEFERRED,outcomes.csv,设计选择：所有市场都要求确认，只维护一套流程
+C07,先决条件：P 挡驻车、点火关闭、联网,车端,7.2.2.5,5.2.3,,check_preconditions：NOT_PARKED、IGNITION_NOT_OFF、NO_NETWORK；故障注入 NETWORK_OUTAGE,outcomes.csv（precondition_failures、faults）,不满足 = 不开始安装，不算失败；联网用于安装前确认活动仍有效
+C08,电量保障（含回退余量）,车端,7.2.2.1.2,5.2.4,,min_soc_pct：ICE 60 / PHEV 30 / BEV 30（示例值）→ LOW_SOC；故障注入 BATTERY_LOW_MID_INSTALL → 回滚,outcomes.csv；fault_events.csv,阈值需要用实车能耗测试标定
+C09,升级中车辆不能驾驶，相关功能禁用,车端,7.2.2.1.3；7.2.2.3,5.2.5、5.2.6；5.2.7（草案）,,工具只检查起始条件（P 挡 + 熄火）；release_gate.install_while_driving 必须为 false,设计文档,执行中的互锁是车端功能，不在工具里
+C10,失败恢复：回到旧版本或进入安全状态,车端,7.2.2.1.1,5.2.9,,故障注入 FLASH_FAILURE、BATTERY_LOW_MID_INSTALL → ROLLED_BACK（回滚失败则 SAFE_STATE）；SAFE_STATE 零容忍；check_final_states 检查终态,outcomes.csv（final_state）；fault_summary.csv；wave_summary.csv,
+C11,升级后结果告知,车端,7.2.2.4,5.2.8、5.2.10,,user_message：POST_SUCCESS / POST_FAILED_RESTORED / POST_FAILED_SAFE_STATE,outcomes.csv,失败消息必须带处理建议（GB 5.2.8 c)）
+C12,升级包签名与交付链路安全,发布前,7.1.3.1、7.1.3.2；7.2.1.1,5.1.1；草案 4.4.1–4.4.2,R155 附件5 威胁 12.x、13.1 → M16、M11、M3；R155 7.3.8；GB 44495 7.3；TARA TS1、TS2,check_release_gate：signature_verified 必须为 true；故障注入 SIGNATURE_INVALID → 拒装，闸门零容忍 HALT,campaign_record.json（release_gate）；fault_events.csv；wave_summary.csv,工具不做密码学验证，只模拟车端验签的结果
+C13,记录留存,记录,7.1.1.1；7.1.2.1–7.1.2.5；3.7,草案 4.1.2、4.3,,写出 eligibility、wave_plan、outcomes、wave_summary、campaign_record,out/*/,保存期限（至少到停产后 10 年）是流程要求，不在工具里
+C14,分批推送与闸门（试点 → 扩量 → 全量）,活动运营,法规没有直接要求；用来支撑 7.1.2.5 (h)(i)、7.1.3.3 的证据,草案 4.4.3、4.4.4（应急）,,wave_targets、plan_waves、gate_decision；超过阈值的批次之后不再执行（faulty_variant、fault_halt 演示）,wave_plan.csv；wave_summary.csv；segment_summary.csv,工程实践
+C15,需要专业操作的升级改为到店完成，不进入面向用户的 OTA 推送,发布前,7.1.4.2（01: 7.1.5.2）,草案 4.5.2,,release_gate.requires_skilled_action 为 true 时拒绝排计划,终端提示,
+C16,不在行驶中安装,发布前,7.1.4.1（01: 7.1.5.1）；7.2.2.3,草案 4.5.1；5.2.6,,release_gate.install_while_driving 为 true 时拒绝排计划,终端提示,下载可以在行驶中后台进行（设计假设）
+C17,RXSWIN 更新与读取,车端 + 记录,7.2.1.2.1–7.2.1.2.3；7.1.1.3（01: 7.1.1.4）；01 系列 7.1.1.3、7.1.4,5.1.2–5.1.4；草案 4.1.3,,安装成功后把 rxswin_after 写入 outcomes；故障注入 RXSWIN_MISMATCH_POST_INSTALL → 回滚；check_final_states 检查版本与 RXSWIN 成对一致,outcomes.csv（rxswin_after）；fault_events.csv,OBD 可读、防篡改是车端功能
+C18,升级后网络安全监测,活动运营,无对应,—,R155 7.2.2.2 (g)、7.3.7；GB 44495 升级安全日志 ≥ 6 个月,不在工具里,—,交给 CSMS / 安全运营
+C19,镜像哈希核对：与签名清单不一致就重新下载，仍不一致就拒装,车端,7.2.1.1,5.1.1,R155 附件5 12.3 → M16；TARA TS1,故障注入 HASH_MISMATCH → REDOWNLOADED 或 REJECTED_INTEGRITY,fault_events.csv；fault_summary.csv,
+C20,签名私钥存放在 HSM，签名双人审批、留审计日志,发布前,7.1.3.2,草案 4.4.1–4.4.2,R155 附件5 12.4、19.3、1.1 → M11、M1、M19；TARA TS2,不在工具里,—,流程控制
+C21,车辆与升级服务器互相认证身份，下载中断恢复后重新认证,车端,7.1.3.2,—,GB 44495 7.3(3)；R155 附件5 6.2 → M10；TARA TS1,故障注入 DOWNLOAD_INTERRUPTED → RESUMED（重新认证后续传）或 ABANDONED,fault_events.csv,
+C22,防回滚：车端拒绝低于当前的版本；发布闸门拒绝目标版本不高于当前版本的活动,发布前 + 车端,7.1.1.7；7.2.1.2.3,—,R155 附件5 6.3 → M10；TARA TS3,check_release_gate：to_version 必须高于所有 from_versions（authorized_downgrade 例外）,终端提示,推送旧版本要单独审批，当作一次新的升级活动
+C23,后端韧性：CDN 冗余、限流、DDoS 防护、恢复预案,活动运营,7.1.3.2,—,R155 附件5 13.1、2.1 → M3；TARA TS4,部分：故障注入 NETWORK_OUTAGE（车辆停在旧版本，样本不足就 HOLD）,fault_events.csv；wave_summary.csv,后端防护本身不在工具里
+C24,活动配置变更控制：双人审批、最小权限、审计日志,发布前,7.1.1.1；7.1.2,草案 4.3,R155 附件5 1.1、1.2、15.2、21.1 → M1、M2、M19、M7；TARA TS5,不在工具里,—,流程控制
+C25,数据最小化：活动清单只放车辆 ID 和配置，访问控制和加密,活动运营,—,—,R155 附件5 3.1、3.3、3.5 → M1、M2、M5；TARA TS6,部分：车队与输出只含合成车辆 ID，没有个人信息,data/；out/,
+C26,OTA 主控安全启动；漏洞在 6 个月内处置,车端,—,—,GB 44495 7.3(1)(2)；R155 附件5 9.1、28.2、29.2 → M9、M23；TARA TS8,不在工具里,—,车端功能
+C27,诊断安全访问认证；ECU 本地刷写前验签,车端,7.2.1.2.3,5.1.4（草案）,GB 44495 7.3(4)；R155 附件5 12.2、18.3 → M16、M22；TARA TS7,不在工具里；安装后回读校验见 C17,—,车端功能

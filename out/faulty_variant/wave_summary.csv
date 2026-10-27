@@ -1,0 +1,5 @@
+wave_no,wave_name,targeted,not_ready,user_deferred,network_outage,download_failed,rejected_signature,rejected_integrity,attempted,installed,rolled_back,safe_state,failed,complaints,success_rate,rollback_rate,rollback_wilson_low,complaint_rate,complaint_wilson_low,decision,decision_reasons
+1,pilot,271,71,31,0,2,0,0,167,154,13,0,13,4,0.9222,0.0778,0.0461,0.024,0.0094,HALT,"rollback_rate=13/167=7.78%, Wilson下界4.61%>2.00% | complaint_rate=4/167=2.40%>1.00%（下界0.94%未超）"
+2,expand-1,186,,,,,,,,,,,,,,,,,,NOT_EXECUTED,
+3,expand-2,1370,,,,,,,,,,,,,,,,,,NOT_EXECUTED,
+4,full,2740,,,,,,,,,,,,,,,,,,NOT_EXECUTED,

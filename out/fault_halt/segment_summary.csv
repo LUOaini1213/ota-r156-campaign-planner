@@ -1,0 +1,11 @@
+wave_no,wave_name,model,hw_variant,attempted,failed,failure_rate
+1,pilot,MODEL_A,A-H1,48,0,0.0
+1,pilot,MODEL_A,A-H2,30,0,0.0
+1,pilot,MODEL_B,B-H2,37,0,0.0
+1,pilot,MODEL_B,B-H3,21,0,0.0
+1,pilot,MODEL_C,C-H3,29,1,0.0345
+2,expand-1,MODEL_A,A-H1,34,0,0.0
+2,expand-1,MODEL_A,A-H2,25,0,0.0
+2,expand-1,MODEL_B,B-H2,27,0,0.0
+2,expand-1,MODEL_B,B-H3,12,0,0.0
+2,expand-1,MODEL_C,C-H3,21,0,0.0
