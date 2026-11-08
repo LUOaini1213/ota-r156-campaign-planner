@@ -160,7 +160,7 @@ def test_campaign_halt_discards_partial_download(bed):
     assert bed.client.update() == "DOWNLOAD_INCOMPLETE"
     assert bed.ecu.journal.read()["offset"] == 512                  # 只保留完整写入的块
     del bed.mirror.image_overrides[NEW.filename]
-    bed.halt_campaign()                                             # 后端叫停（P3 的 HALT 闸门）
+    bed.halt_campaign()                                             # 后端叫停（主项目的 HALT 闸门）
     before = bed.ecu_state()
     assert bed.client.update() == "ABORTED_ASSIGNMENT_CHANGED"
     assert bed.ecu_state() == before and bed.ecu.journal.read()["state"] == "IDLE"

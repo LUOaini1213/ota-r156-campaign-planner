@@ -1,0 +1,53 @@
+name: test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            python: "3.10"
+          - os: ubuntu-latest
+            python: "3.11"
+          - os: windows-latest
+            python: "3.11"
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    env:
+      PYTHONIOENCODING: utf-8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install
+        run: python -m pip install -r requirements.txt
+      - name: Tests
+        run: python -m pytest -q -p no:cacheprovider
+      - name: Regenerate data/ and out/ with the README commands
+        run: |
+          python ota_plan.py generate
+          for c in baseline faulty_variant fault_injection fault_halt; do
+            python ota_plan.py run --fleet data/fleet_synthetic_MY.csv --campaign campaigns/campaign_$c.json --out out/$c
+          done
+          git diff --exit-code data out
+          test -z "$(git status --porcelain data out)"
+      - name: Byte-level replay, README numbers and test counts
+        run: python tools/check_results.py --check
+      - name: Demo
+        run: python -X utf8 -m secure_update.demo
+      - name: Mutation drill (10 defences)
+        if: matrix.os == 'ubuntu-latest'
+        run: python -X utf8 -m secure_update.mutation_check
+      - name: No local machine paths in tracked text files
+        run: |
+          if git grep -nIE '[A-Za-z]:[\/](Users|Documents and Settings)[\/]|/home/[a-z]+/|/Users/[A-Za-z]+/' -- . ':!.github/workflows/test.yml'; then
+            echo "local path found"; exit 1
+          fi
