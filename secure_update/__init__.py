@@ -1,4 +1,4 @@
-"""secure_update：车端安全升级演示（P3 的车端补充）。
+"""secure_update：车端安全升级演示（主项目的车端补充）。
 
 两部分：
   1. 参照 Uptane 的元数据与校验：root / targets / snapshot / timestamp 四个角色，Director 与 Image 两个仓库，

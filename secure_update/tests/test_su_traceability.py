@@ -1,6 +1,6 @@
 """追溯表与仓库卫生自检。
 
-1. traceability_secure_update.csv 的每个 ID 都能在 P3 的文件或官方文本里找到；每个测试函数都有一行映射，反之亦然。
+1. traceability_secure_update.csv 的每个 ID 都能在主项目的文件或官方文本里找到；每个测试函数都有一行映射，反之亦然。
 2. secure_update/ 里没有私钥、没有绝对路径。
 """
 import ast
@@ -9,7 +9,7 @@ import re
 from pathlib import Path
 
 SU = Path(__file__).resolve().parents[1]
-P3 = SU.parent
+ROOT = SU.parent
 MAPPED_TEST_FILES = ("test_su_metadata_attacks.py", "test_su_image_key_attacks.py", "test_su_ecu_client.py")
 CATEGORIES = {"基础", "元数据攻击", "镜像攻击", "密钥攻击", "设备故障", "防回滚", "活动控制", "RXSWIN 记录"}
 
@@ -44,20 +44,20 @@ def ids(cell: str) -> set[str]:
 
 def test_traceability_csv_covers_every_test_and_ids_exist():
     rows = read_csv(SU / "traceability_secure_update.csv")
-    req_ids = {r["req_id"] for r in read_csv(P3 / "01_requirements_checklist.csv")}
-    controls = {r["control_id"] for r in read_csv(P3 / "02_traceability_matrix.csv")}
-    tara = read_csv(P3 / "03_tara.csv")
+    req_ids = {r["req_id"] for r in read_csv(ROOT / "01_requirements_checklist.csv")}
+    controls = {r["control_id"] for r in read_csv(ROOT / "02_traceability_matrix.csv")}
+    tara = read_csv(ROOT / "03_tara.csv")
     tara_ids = ({r["ts_id"] for r in tara} | {d for r in tara for d in r["damage_scenarios"].split(";")}
                 | {re.match(r"CG\d+", r["cybersecurity_goal"]).group() for r in tara})
     assert len(rows) == len({r["test_id"] for r in rows}) == len({r["pytest_node"] for r in rows})
     for row in rows:
         tid = row["test_id"]
         path, _, func = row["pytest_node"].partition("::")
-        assert (P3 / path).is_file() and func.startswith("test_"), tid
+        assert (ROOT / path).is_file() and func.startswith("test_"), tid
         assert row["category"] in CATEGORIES and row["scenario_cn"] and row["expected_cn"], tid
-        assert ids(row["p3_req_ids"]) and ids(row["p3_req_ids"]) <= req_ids, tid
-        assert ids(row["p3_controls"]) <= controls, tid
-        assert ids(row["p3_tara"]) <= tara_ids, tid
+        assert ids(row["project_req_ids"]) and ids(row["project_req_ids"]) <= req_ids, tid
+        assert ids(row["project_controls"]) <= controls, tid
+        assert ids(row["project_tara"]) <= tara_ids, tid
         threats = ids(row["r155_annex5_threats"])
         assert threats <= set(R155_ANNEX5), tid
         assert ids(row["r155_annex5_mitigations"]) == set().union(*(R155_ANNEX5[t] for t in threats)), tid

@@ -27,7 +27,7 @@ from datetime import date, timedelta
 from pathlib import Path
 
 SYNTHETIC_LABEL = "SYNTHETIC_DEMO"
-# 规模参照：调用方提供的马来西亚 JPJ 登记汇总中 Chery 2025-01—2026-08 约 52,872 辆，按 1:10 缩放。
+# 规模参照：马来西亚 JPJ 登记汇总（未核实，见需求清单第 6 节）中 Chery 2025-01—2026-08 约 52,872 辆，按 1:10 缩放。
 # 只用来定车队规模，车队内容全部是合成的。
 DEFAULT_FLEET_SIZE = round(52_872 / 10)
 
@@ -589,8 +589,9 @@ FAULT_SUMMARY_FIELDS = ["fault", "detail", "events", *SAFE_FINAL_STATES, "all_sa
 
 
 def write_csv(path: Path, rows: list[dict], fields: list[str]) -> None:
+    # 固定用 LF 换行：Windows 和 Linux 生成的文件逐字节一致，可以直接和已提交的结果比对
     with open(path, "w", newline="", encoding="utf-8") as fh:
-        wr = csv.DictWriter(fh, fieldnames=fields, extrasaction="ignore")
+        wr = csv.DictWriter(fh, fieldnames=fields, extrasaction="ignore", lineterminator="\n")
         wr.writeheader()
         wr.writerows(rows)
 
@@ -623,7 +624,7 @@ def write_outputs(res: CampaignResult, c: dict, out_dir: str | Path, seed: int, 
         "final_state_counts": dict(Counter(o["final_state"] for o in res.outcomes)),
         "final_state_violations": violations, "fault_summary": fault_summary(res),
     }
-    with open(out / "campaign_record.json", "w", encoding="utf-8") as fh:
+    with open(out / "campaign_record.json", "w", encoding="utf-8", newline="\n") as fh:
         json.dump(record, fh, ensure_ascii=False, indent=2)
 
 

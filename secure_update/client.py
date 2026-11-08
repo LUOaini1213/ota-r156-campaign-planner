@@ -20,7 +20,7 @@ from .errors import (AntiRollbackError, ArbitrarySoftwareError, BrickedError, Do
 from .verifier import FullVerifier, VerifiedTarget
 
 MAX_STEPS = 1000
-MAX_IMAGE_RETRIES = 1        # 读回哈希不符时重新下载 1 次，仍不符就拒装（与 P3 控制点 C19 一致）
+MAX_IMAGE_RETRIES = 1        # 读回哈希不符时重新下载 1 次，仍不符就拒装（与主项目控制点 C19 一致）
 
 HealthCheck = Callable[[dict], str]           # 返回 "OK" / "FAIL" / "CRASH"
 Preconditions = Callable[[], Iterable[str]]   # 返回未满足的先决条件，例如 ["LOW_SOC"]

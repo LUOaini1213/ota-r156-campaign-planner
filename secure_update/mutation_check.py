@@ -1,7 +1,7 @@
 """python -m secure_update.mutation_check：变异检查（开发工具，不在测试套件里）。
 
 逐个“关掉”一道防线（只在子进程内存里打补丁，不改任何文件），再跑对应的测试，确认测试会失败。
-如果某道防线关掉了测试还通过，说明测试没有真正覆盖它。在 P3 根目录运行，约 10 秒。
+如果某道防线关掉了测试还通过，说明测试没有真正覆盖它。在仓库根目录运行，约 10 秒。
 """
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-P3 = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[1]
 T = "secure_update/tests/"
 
 MUTANTS = [
@@ -60,19 +60,25 @@ MUTANTS = [
 
 
 def main() -> int:
-    survivors = []
+    survivors, errors = [], []
     env = {**os.environ, "PYTHONIOENCODING": "utf-8"}
     for name, patch, selection in MUTANTS:
         code = f"{patch}\nimport pytest, sys\nsys.exit(pytest.main(['-q', '-p', 'no:cacheprovider', *{selection!r}]))"
-        proc = subprocess.run([sys.executable, "-B", "-c", code], cwd=P3, env=env, capture_output=True,
+        proc = subprocess.run([sys.executable, "-B", "-c", code], cwd=ROOT, env=env, capture_output=True,
                               text=True, encoding="utf-8", errors="replace", timeout=300)
         lines = [line for line in proc.stdout.splitlines() if "passed" in line or "failed" in line]
-        killed = proc.returncode != 0
-        print(f"{'被测试发现' if killed else '没被发现！'} | {name} | {lines[-1] if lines else proc.stdout[-200:]}")
-        if not killed:
+        # pytest 退出码：0 = 全部通过，1 = 有测试失败。只有 1 才算“被测试发现”；
+        # 2/3/4/5（中断、内部错误、用法错误、-k 没选中任何测试）说明测试根本没跑完，单独报错。
+        status = {0: "没被发现！", 1: "被测试发现"}.get(proc.returncode, f"出错（pytest 退出码 {proc.returncode}）")
+        print(f"{status} | {name} | {lines[-1] if lines else proc.stdout[-200:]}")
+        if proc.returncode == 0:
             survivors.append(name)
+        elif proc.returncode != 1:
+            errors.append(name)
+    if errors:
+        print(f"这些变异没有得到有效的测试结果：{errors}")
     print("全部防线都有测试覆盖" if not survivors else f"没有被测试覆盖的防线：{survivors}")
-    return 1 if survivors else 0
+    return 1 if survivors or errors else 0
 
 
 if __name__ == "__main__":

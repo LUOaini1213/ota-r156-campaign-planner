@@ -1,5 +1,13 @@
 # 海外市场 OTA 合规与升级活动规划
 
+[![tests](https://github.com/LUOaini1213/ota-r156-campaign-planner/actions/workflows/test.yml/badge.svg)](https://github.com/LUOaini1213/ota-r156-campaign-planner/actions/workflows/test.yml)
+
+**In English.** A personal practice project on OTA (over-the-air) software-update compliance for an overseas market, built with AI assistance.
+- **Built:** a checklist of 77 requirements from UN R156 / GB 44496 (with R155 links), 27 controls traced to clauses, an 8-threat TARA, and a stdlib Python campaign planner that runs staged rollouts with PASS / HOLD / HALT gates and 7 kinds of injected fault on a 5,287-vehicle synthetic fleet.
+- **Found (synthetic data, seed 7):** the baseline campaign completes with 2,889 installs at 99.69% success; a hardware-incompatible variant is halted after 13/167 pilot rollbacks; 512 injected fault events all end in a safe, recorded state; a bad signature in wave 2 halts the campaign.
+- **Vehicle side:** an Uptane-inspired client with real Ed25519 signing and A/B slots rejects all 14 attacks and survives all 249 power-cut cases in tests.
+- **Limits:** the fleet is synthetic and represents no carmaker's data; probabilities, thresholds and TARA scores are assumptions; several regulation dates and the JPJ fleet figure are unverified; not a conformance implementation (no HSM, TLS or diagnostics security). Every number above is recomputed from committed files by `python tools/check_results.py --check` in CI.
+
 个人项目（2026-10），使用 AI 工具辅助完成。练习的工作内容：梳理海外项目的 OTA 需求、策划 OTA 升级活动、保证交付材料合规。
 
 项目把**法规条款 → 威胁与风险 → 升级活动的控制点 → 工具里的检查和故障注入 → 输出的证据**串成一条线。车队数据是合成的，不代表任何车企的真实流程或数据。
@@ -51,7 +59,8 @@
 | `campaigns/` | 活动配置：`baseline`、`faulty_variant`（B-H2 硬件兼容问题）、`fault_injection`（低概率注入各类故障）、`fault_halt`（第2批签名无效） |
 | `data/fleet_synthetic_MY.csv` | 合成车队 |
 | `out/<活动>/` | 每次运行的输出：资格、分批、逐车结局和终态、每批 KPI 与闸门、分层失败分布、`fault_events.csv`、`fault_summary.csv`、活动记录 JSON |
-| `tests/` | 72 个 pytest 用例。`test_ota_plan.py` 51 个；`test_fault_injection.py` 21 个，覆盖故障注入、防回滚和 TARA 表复算 |
+| `tests/` | 79 个 pytest 用例。`test_ota_plan.py` 51 个；`test_fault_injection.py` 21 个，覆盖故障注入、防回滚和 TARA 表复算；`test_golden.py` 7 个，逐字节重放 `data/` 和 `out/`，并核对 README 数字 |
+| `tools/check_results.py` | CI 用的核对脚本：重放输出、核对 README 数字和测试数量 |
 | `secure_update/` | 车端安全升级代码、55 个测试用例、追溯表 `traceability_secure_update.csv`（38 行）、说明 `README.md`；设计文档第 10 节是汇总 |
 
 ## 怎么运行
@@ -59,14 +68,16 @@
 在本目录下运行。如果 Windows 终端中文显示乱码，先执行 `$env:PYTHONIOENCODING="utf-8"`。
 
 ```bash
+python -m pip install -r requirements.txt   # Python 3.10+；pytest 和 cryptography
 python ota_plan.py generate                  # 生成 data/fleet_synthetic_MY.csv（5,287 辆，seed 2026）
 python ota_plan.py run --fleet data/fleet_synthetic_MY.csv --campaign campaigns/campaign_baseline.json --out out/baseline
 python ota_plan.py run --fleet data/fleet_synthetic_MY.csv --campaign campaigns/campaign_faulty_variant.json --out out/faulty_variant
 python ota_plan.py run --fleet data/fleet_synthetic_MY.csv --campaign campaigns/campaign_fault_injection.json --out out/fault_injection
 python ota_plan.py run --fleet data/fleet_synthetic_MY.csv --campaign campaigns/campaign_fault_halt.json --out out/fault_halt
-python -m pytest -q                          # 需要 pytest 和 cryptography；当前 127 passed（原有 72 + secure_update 55）
+python -m pytest -q                          # 当前 134 passed（主项目 79 + secure_update 55）
 python -X utf8 -m secure_update.demo         # 14 个攻击场景 + 断电扫描
 python -X utf8 -m secure_update.mutation_check   # 逐个关掉 10 道防线，确认每道都有测试能发现
+python tools/check_results.py --check        # 重放全部输出逐字节比对，并核对本 README 的数字和测试数量
 ```
 
 **演示结果**（合格车辆 4,567 / 5,287；试点推送 271 辆，覆盖全部 25 个分层）：
@@ -88,7 +99,7 @@ python -X utf8 -m secure_update.mutation_check   # 逐个关掉 10 道防线，�
 - **TARA 的分数靠谱吗？** 是示例。方法上，影响按四类分别评、取最高；可行性用攻击潜力五因素打分；风险矩阵和取值要按企业准则定。我能讲清每个分数为什么这样给，比如 TS1 处置前后各因素怎么变。
 - **为什么签名失败零容忍，哈希不一致却允许重下？** 哈希不一致多半是传输损坏，重下就能解决；签名无效说明包不是 OEM 签的，可能是攻击，所以车端拒装，活动叫停，交给安全团队。
 - **回滚也失败怎么办？** 车辆进入安全状态，版本标为“待核实”，闸门立即 HALT，车辆到店重新刷写并核实。R156 7.2.2.1.1 允许“恢复旧版本”或“进入安全状态”二选一。
-- **断网为什么判 HOLD 而不是 HALT？** 断网不说明软件有问题，只是没有足够的安装样本做判断，所以先不扩量。
+- **断网导致样本不足时，为什么判 HOLD 而不是 HALT？** 断网不说明软件有问题，只是安装样本不够（少于 30 次）做判断，所以先不扩量。断网本身不触发 HOLD：fault_injection 第3批有 330 辆车断网，但仍有 551 次安装，闸门照常判 PASS。
 
 ## 诚实说明
 

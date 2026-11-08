@@ -21,8 +21,8 @@ from .repository import Repository
 from .transport import Mirror
 from .verifier import RepoState
 
-NOW = datetime(2026, 10, 27, tzinfo=timezone.utc)      # 与 P3 演示的 as_of 一致
-ECU_ID, HW_ID = "ECU-DEMO-01", "A-H1"                  # 合成编号；硬件代号沿用 P3 合成车队里虚构的 A-H1 / A-H2
+NOW = datetime(2026, 10, 27, tzinfo=timezone.utc)      # 与主项目演示的 as_of 一致
+ECU_ID, HW_ID = "ECU-DEMO-01", "A-H1"                  # 合成编号；硬件代号沿用主项目合成车队里虚构的 A-H1 / A-H2
 OTHER_ECU_ID, OTHER_HW_ID = "ECU-DEMO-02", "A-H2"
 INVENTORY = {ECU_ID: HW_ID, OTHER_ECU_ID: OTHER_HW_ID}  # 车上有哪些 ECU（Primary 用来核对 Director 的指派）
 CHUNK_SIZE = 512
@@ -57,7 +57,7 @@ class Release:
                 "sw_version": self.sw_version, "secure_version": self.secure_version, "rxswin": self.rxswin}
 
 
-# 版本号与 RXSWIN 沿用 P3 活动配置里 MODEL_A 的登记册：1.4.2 / 1.5.0 → A-RX-06，1.6.0 → A-RX-07
+# 版本号与 RXSWIN 沿用主项目活动配置里 MODEL_A 的登记册：1.4.2 / 1.5.0 → A-RX-06，1.6.0 → A-RX-07
 FACTORY = Release("1.5.0", secure_version=2, release_counter=5, rxswin="A-RX-06")
 NEW = Release("1.6.0", secure_version=3, release_counter=6, rxswin="A-RX-07")
 OLD_VULNERABLE = Release("1.4.2", secure_version=1, release_counter=4, rxswin="A-RX-06")
@@ -128,7 +128,7 @@ class UpdateBed:
         return entry
 
     def halt_campaign(self) -> None:
-        """后端叫停活动：Director 撤回全部指派（对应 P3 的 HALT 闸门）。"""
+        """后端叫停活动：Director 撤回全部指派（对应主项目的 HALT 闸门）。"""
         self.director.targets.clear()
         self.director.publish()
 

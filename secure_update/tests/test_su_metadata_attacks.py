@@ -1,6 +1,6 @@
 """元数据层：确定性序列化、Ed25519 签名，以及元数据攻击（freeze、rollback、mix-and-match、过期、endless data）。
 
-每个测试函数在 traceability_secure_update.csv 里有一行：测试 → Uptane 2.1.0 条款 → R155 附件5 → P3 的 TARA / 控制点 / 需求。
+每个测试函数在 traceability_secure_update.csv 里有一行：测试 → Uptane 2.1.0 条款 → R155 附件5 → 主项目的 TARA / 控制点 / 需求。
 攻击被拒之后统一检查：抛出指明攻击类型的异常；安全日志有记录；ECU 的 active 槽、软件标识、计数器都不变。
 """
 from datetime import timedelta
